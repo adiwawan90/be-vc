@@ -122,4 +122,121 @@ module.exports = {
       },
     });
   },
+
+  async getUserById(req, res) {
+    const { id } = req.params;
+
+    try {
+      const user = await Users.findByPk(id);
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "user not found",
+        });
+      }
+
+      return res.status(200).json({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        dob: user.dob,
+        photo_url: user.photo_url,
+        cover_url: user.cover_url,
+      });
+    } catch (error) {
+      return res.status(400).json({
+        status: "error",
+        message: error.message || error,
+      });
+    }
+  },
+
+  async updateUser(req, res) {
+    const { id } = req.params;
+
+    try {
+      const schema = {
+        name: "string|empty:false",
+        email: "email|empty:false",
+        password: "string|min:6",
+        dob: "string|optional",
+        cover_url: "string|optional",
+        photo_url: "string|optional",
+      };
+
+      const validate = v.validate(req.body, schema);
+
+      if (validate.length) {
+        return res.status(400).json({
+          status: "error",
+          message: validate,
+        });
+      }
+
+      const id = req.params.id;
+      const user = await Users.findByPk(id);
+
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "user not found",
+        });
+      }
+
+      const email = req.body.email;
+      if (email) {
+        const checkEmail = await Users.findOne({
+          where: { email },
+        });
+
+        if (checkEmail && email !== user.email) {
+          return res.status(409).json({
+            status: "error",
+            message: "email already exist",
+          });
+        }
+      }
+
+      const password = await bcrypt.hash(req.body.password, 10);
+
+      const { name, dob, photo_url, cover_url } = req.body;
+
+      if (dob) {
+        const aDate = moment(req.body.dob, "YYYY-MM-DD", true);
+        const isValid = aDate.isValid();
+        if (!isValid) {
+          return res.status(400).json({
+            status: "error",
+            message: "dob format YYYY-MM-DD",
+          });
+        }
+      }
+
+      await user.update({
+        email,
+        password,
+        name,
+        dob,
+        photo_url,
+        cover_url,
+      });
+
+      return res.json({
+        status: "success",
+        data: {
+          id: user.id,
+          email,
+          name,
+          dob,
+          photo_url,
+          cover_url,
+        },
+      });
+    } catch (error) {
+      return res.status(400).json({
+        status: "error",
+        message: error.message || error,
+      });
+    }
+  },
 };
