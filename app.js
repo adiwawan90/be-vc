@@ -8,6 +8,7 @@ const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const followRouter = require("./routes/follower");
 const postsRouter = require("./routes/posts");
+const postsLikesRouter = require("./routes/post-likes");
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/follows", followRouter);
 app.use("/posts", postsRouter);
+app.use("/posts-likes", postsLikesRouter);
 
 module.exports = app;

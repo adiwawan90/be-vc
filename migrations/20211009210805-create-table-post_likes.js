@@ -18,8 +18,7 @@ module.exports = {
         allowNull: false,
       },
       status_like: {
-        type: Sequelize.ENUM,
-        values: ["like", "dislike"],
+        type: Sequelize.TINYINT(1),
         allowNull: false,
       },
       created_at: {

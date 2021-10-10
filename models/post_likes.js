@@ -16,11 +16,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      status_likes: {
-        type: DataTypes.ENUM,
-        values: ["like", "dislike"],
+      status_like: {
+        type: DataTypes.TINYINT(1),
         allowNull: false,
-        defaultValue: null,
       },
       createdAt: {
         field: "created_at",
@@ -34,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      tableName: "comment_likes",
+      tableName: "post_likes",
       timestamp: true,
     }
   );

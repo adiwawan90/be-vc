@@ -1,5 +1,7 @@
 const { Posts } = require("../models");
 const { Users } = require("../models");
+const { Post_likes } = require("../models");
+const { Comments } = require("../models");
 
 const Validator = require("fastest-validator");
 const v = new Validator();
@@ -187,6 +189,68 @@ module.exports = {
       return res.status(200).json({
         status: "success",
         message: "post successfully deleted",
+      });
+    } catch (error) {
+      return res.status(400).json({
+        status: "error",
+        message: error.message || error,
+      });
+    }
+  },
+  async postWithStatus(req, res) {
+    const { postId } = req.params;
+
+    try {
+      const post = await Posts.findByPk(postId, {
+        include: [
+          {
+            model: Comments,
+            as: "comments",
+          },
+          {
+            model: Users,
+            as: "authors",
+            attributes: [
+              "id",
+              "email",
+              "username",
+              "firstname",
+              "lastname",
+              "photo_url",
+            ],
+          },
+        ],
+      });
+      const likes = await Post_likes.count({
+        col: "status_like",
+        where: { post_id: postId, status_like: 1 },
+      });
+      const dislikes = await Post_likes.count({
+        col: "status_like",
+        where: { post_id: postId, status_like: 0 },
+      });
+
+      if (!post) {
+        return res.status(404).json({
+          status: "error",
+          message: "post not found",
+        });
+      }
+      console.log(post);
+      return res.status(200).json({
+        status: "success ya",
+        data: {
+          id: post.id,
+          user_id: post.user_id,
+          author: post.authors,
+          post: post.post,
+          image_url: post.image_url,
+          comments: post.comments,
+          likes: likes,
+          dislikes: dislikes,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+        },
       });
     } catch (error) {
       return res.status(400).json({
