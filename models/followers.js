@@ -12,13 +12,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      post: {
-        type: DataTypes.STRING,
-        allowNull: true,
+      following_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       },
-      image_url: {
-        type: DataTypes.STRING,
-        allowNull: true,
+      status: {
+        type: DataTypes.TINYINT(1),
+        allowNull: false,
       },
       createdAt: {
         field: "created_at",

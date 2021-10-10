@@ -8,11 +8,11 @@ const { Users } = require("../models");
 module.exports = {
   async register(req, res) {
     const schema = {
-      name: "string|empty:false",
+      username: "string|empty:false",
       email: "email|empty:false",
       password: "string|min:6",
-      dob: "string|optional",
-      cover_url: "string|optional",
+      firstname: "string|empty:false",
+      lastname: "string|empty:false",
       photo_url: "string|optional",
     };
 
@@ -36,25 +36,14 @@ module.exports = {
       });
     }
 
-    if (req.body.dob) {
-      const aDate = moment(req.body.dob, "YYYY-MM-DD", true);
-      const isValid = aDate.isValid();
-      if (!isValid) {
-        return res.status(400).json({
-          status: "error",
-          message: "dob format YYYY-MM-DD",
-        });
-      }
-    }
-
     const password = await bcrypt.hash(req.body.password, 10);
 
     const data = {
       password,
-      name: req.body.name,
+      username: req.body.username,
       email: req.body.email,
-      dob: req.body.dob,
-      cover_url: req.body.cover_url,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
       photo_url: req.body.photo_url,
       role: "user",
       status: "active",
@@ -112,12 +101,12 @@ module.exports = {
       status: "success",
       data: {
         id: user.id,
-        name: user.name,
+        username: user.username,
         email: user.email,
-        dob: user.dob,
-        role: user.role,
-        cover_url: user.cover_url,
+        firstname: user.firstname,
+        lastname: user.lastname,
         photo_url: user.photo_url,
+        role: user.role,
         status: user.status,
       },
     });
@@ -137,10 +126,10 @@ module.exports = {
 
       return res.status(200).json({
         id: user.id,
+        username: user.username,
         email: user.email,
-        name: user.name,
-        dob: user.dob,
-        photo_url: user.photo_url,
+        firstname: user.firstname,
+        lastname: user.lastname,
         cover_url: user.cover_url,
       });
     } catch (error) {
@@ -156,11 +145,11 @@ module.exports = {
 
     try {
       const schema = {
-        name: "string|empty:false",
+        username: "string|empty:false",
         email: "email|empty:false",
         password: "string|min:6",
-        dob: "string|optional",
-        cover_url: "string|optional",
+        firstname: "string|empty:false",
+        lastname: "string|empty:false",
         photo_url: "string|optional",
       };
 
@@ -199,37 +188,26 @@ module.exports = {
 
       const password = await bcrypt.hash(req.body.password, 10);
 
-      const { name, dob, photo_url, cover_url } = req.body;
-
-      if (dob) {
-        const aDate = moment(req.body.dob, "YYYY-MM-DD", true);
-        const isValid = aDate.isValid();
-        if (!isValid) {
-          return res.status(400).json({
-            status: "error",
-            message: "dob format YYYY-MM-DD",
-          });
-        }
-      }
+      const { username, firstname, lastname, photo_url } = req.body;
 
       await user.update({
+        username,
         email,
         password,
-        name,
-        dob,
+        firstname,
+        lastname,
         photo_url,
-        cover_url,
       });
 
       return res.json({
         status: "success",
         data: {
           id: user.id,
+          username,
           email,
-          name,
-          dob,
+          firstname,
+          lastname,
           photo_url,
-          cover_url,
         },
       });
     } catch (error) {

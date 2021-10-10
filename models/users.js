@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         allowNull: false,
       },
-      name: {
+      username: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -20,13 +20,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      dob: {
+      firstname: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
-      cover_url: {
+      lastname: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       photo_url: {
         type: DataTypes.STRING,

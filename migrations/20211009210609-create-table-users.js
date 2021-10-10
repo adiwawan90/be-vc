@@ -9,7 +9,7 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      name: {
+      username: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -21,13 +21,13 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      dob: {
+      firstname: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: false,
       },
-      cover_url: {
+      lastname: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       photo_url: {
         type: Sequelize.STRING,
