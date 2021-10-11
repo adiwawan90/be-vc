@@ -20,10 +20,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      image_url: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
       createdAt: {
         field: "created_at",
         type: DataTypes.DATE,
@@ -44,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
   Comments.associate = (models) => {
     Comments.belongsTo(models.Users, {
       foreignKey: "user_id",
+      as: "user",
     });
     Comments.belongsTo(models.Posts, {
       foreignKey: "post_id",

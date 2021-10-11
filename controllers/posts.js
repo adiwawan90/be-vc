@@ -1,3 +1,4 @@
+const Sequelize = require("sequelize");
 const { Posts } = require("../models");
 const { Users } = require("../models");
 const { Post_likes } = require("../models");
@@ -10,7 +11,7 @@ module.exports = {
   async createPost(req, res) {
     const schema = {
       author_id: "number|empty:false",
-      content: "string|empty:false",
+      content: "string|empty:false|max:600",
       content_image: "string|optional",
     };
 
@@ -206,6 +207,20 @@ module.exports = {
           {
             model: Comments,
             as: "comments",
+            include: [
+              {
+                model: Users,
+                as: "user",
+                attributes: [
+                  "id",
+                  "email",
+                  "username",
+                  "firstname",
+                  "lastname",
+                  "photo_url",
+                ],
+              },
+            ],
           },
           {
             model: Users,
@@ -251,6 +266,75 @@ module.exports = {
           createdAt: post.createdAt,
           updatedAt: post.updatedAt,
         },
+      });
+    } catch (error) {
+      return res.status(400).json({
+        status: "error",
+        message: error.message || error,
+      });
+    }
+  },
+  async allPostWithStatus(req, res) {
+    try {
+      const posts = await Posts.findAll({
+        include: [
+          {
+            model: Comments,
+            as: "comments",
+            include: [
+              {
+                model: Users,
+                as: "user",
+                attributes: [
+                  "id",
+                  "email",
+                  "username",
+                  "firstname",
+                  "lastname",
+                  "photo_url",
+                ],
+              },
+            ],
+          },
+          {
+            model: Users,
+            as: "authors",
+            attributes: [
+              "id",
+              "email",
+              "username",
+              "firstname",
+              "lastname",
+              "photo_url",
+            ],
+          },
+
+          {
+            model: Post_likes,
+            as: "likes",
+          },
+        ],
+      });
+
+      const mapResult = posts.map((item) => ({
+        id: item.id,
+        user_id: item.user_id,
+        post: item.post,
+        image_url: item.image_url,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        comments: item.comments,
+        likes: item.likes
+          ?.filter((tot) => tot.status_like === 1)
+          ?.map((item) => item.status_like).length,
+        dislikes: item.likes
+          ?.filter((tot) => tot.status_like === 0)
+          ?.map((item) => item.status_like).length,
+      }));
+
+      return res.status(200).json({
+        status: "success ya",
+        data: mapResult,
       });
     } catch (error) {
       return res.status(400).json({

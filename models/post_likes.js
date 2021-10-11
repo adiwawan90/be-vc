@@ -43,6 +43,7 @@ module.exports = (sequelize, DataTypes) => {
     });
     Post_likes.belongsTo(models.Posts, {
       foreignKey: "post_id",
+      as: "likes",
     });
   };
 
