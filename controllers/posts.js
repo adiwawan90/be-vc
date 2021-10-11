@@ -53,7 +53,6 @@ module.exports = {
       });
     }
   },
-
   async editPost(req, res) {
     const { userId, postId } = req.params;
 
@@ -118,45 +117,6 @@ module.exports = {
       });
     }
   },
-  async getAllPosts(req, res) {
-    try {
-      const posts = await Posts.findAll();
-      return res.status(200).json({
-        status: "success",
-        data: posts,
-      });
-    } catch (error) {
-      return res.status(400).json({
-        status: "error",
-        message: error.message || error,
-      });
-    }
-  },
-  async getPostById(req, res) {
-    const { postId } = req.params;
-
-    try {
-      const post = await Posts.findByPk(postId);
-
-      if (!post) {
-        return res.status(404).json({
-          status: "error",
-          message: "post not found",
-        });
-      }
-
-      return res.status(200).json({
-        status: "success",
-        data: post,
-      });
-    } catch (error) {
-      return res.status(400).json({
-        status: "error",
-        message: error.message || error,
-      });
-    }
-  },
-
   async deletePost(req, res) {
     const { userId, postId } = req.params;
 
@@ -251,7 +211,7 @@ module.exports = {
           message: "post not found",
         });
       }
-      console.log(post);
+
       return res.status(200).json({
         status: "success ya",
         data: {
