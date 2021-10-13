@@ -23,11 +23,11 @@ module.exports = {
       },
       firstname: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       lastname: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
       },
       photo_url: {
         type: Sequelize.STRING,

@@ -11,8 +11,8 @@ module.exports = {
       username: "string|empty:false",
       email: "email|empty:false",
       password: "string|min:6",
-      firstname: "string|empty:false",
-      lastname: "string|empty:false",
+      firstname: "string|optional",
+      lastname: "string|optional",
       photo_url: "string|optional",
     };
 
@@ -108,6 +108,8 @@ module.exports = {
         photo_url: user.photo_url,
         role: user.role,
         status: user.status,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
     });
   },
@@ -141,15 +143,13 @@ module.exports = {
   },
 
   async updateUser(req, res) {
-    const { id } = req.params;
-
     try {
       const schema = {
-        username: "string|empty:false",
-        email: "email|empty:false",
-        password: "string|min:6",
-        firstname: "string|empty:false",
-        lastname: "string|empty:false",
+        username: "string|optional",
+        email: "email|optional",
+        password: "string|min:6|optional",
+        firstname: "string|optional",
+        lastname: "string|optional",
         photo_url: "string|optional",
       };
 
@@ -186,10 +186,29 @@ module.exports = {
         }
       }
 
-      const password = await bcrypt.hash(req.body.password, 10);
-
       const { username, firstname, lastname, photo_url } = req.body;
 
+      if (photo_url) {
+        const updatedUser = await user.update({
+          photo_url,
+        });
+
+        return res.json({
+          status: "success",
+          data: {
+            id: updatedUser.id,
+            username: updatedUser.username,
+            email: updatedUser.email,
+            firstname: updatedUser.firstname,
+            lastname: updatedUser.lastname,
+            photo_url: updatedUser.photo_url,
+            createdAt: updatedUser.createdAt,
+            updatedAt: updatedUser.updatedAt,
+          },
+        });
+      }
+
+      const password = await bcrypt.hash(req.body.password, 10);
       await user.update({
         username,
         email,
@@ -208,7 +227,35 @@ module.exports = {
           firstname,
           lastname,
           photo_url,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
         },
+      });
+    } catch (error) {
+      return res.status(400).json({
+        status: "error",
+        message: error.message || error,
+      });
+    }
+  },
+
+  async deleteUser(req, res) {
+    const { id } = req.params;
+
+    try {
+      const user = await Users.findByPk(id);
+      if (!user) {
+        return res.status(404).json({
+          status: "error",
+          message: "user not found",
+        });
+      }
+
+      await user.destroy();
+
+      return res.status(200).json({
+        status: "success",
+        message: "user deleted successfully",
       });
     } catch (error) {
       return res.status(400).json({

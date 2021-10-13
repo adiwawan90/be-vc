@@ -58,15 +58,24 @@ module.exports = {
         });
       }
       // if user have likes / dislike the post, just update status_likes
-      const updateLikes = await isExist.update({
-        user_id,
-        post_id,
-        status_like,
-      });
-      return res.status(201).json({
-        status: "success",
-        data: updateLikes,
-      });
+      // if status likes === existing delete likes/dislikes
+      if (status_like === isExist.status_like) {
+        await isExist.destroy();
+        return res.status(201).json({
+          status: "success",
+          message: "likes/dislikes removed",
+        });
+      } else {
+        const updateLikes = await isExist.update({
+          user_id,
+          post_id,
+          status_like,
+        });
+        return res.status(201).json({
+          status: "success",
+          data: updateLikes,
+        });
+      }
     } catch (error) {
       return res.status(400).json({
         status: "error",

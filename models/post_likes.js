@@ -39,11 +39,15 @@ module.exports = (sequelize, DataTypes) => {
 
   Post_likes.associate = (models) => {
     Post_likes.belongsTo(models.Users, {
-      foreignKey: "user_id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+      foreignKey: { name: "user_id", allowNull: false },
     });
     Post_likes.belongsTo(models.Posts, {
-      foreignKey: "post_id",
       as: "likes",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+      foreignKey: { name: "post_id", allowNull: false },
     });
   };
 

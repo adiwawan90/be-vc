@@ -57,7 +57,7 @@ module.exports = {
     const { userId, postId } = req.params;
 
     const schema = {
-      author_id: "number|empty:false",
+      // author_id: "number|empty:false",
       content: "string|empty:false",
       content_image: "string|optional",
     };
@@ -278,7 +278,8 @@ module.exports = {
 
       const mapResult = posts.map((item) => ({
         id: item.id,
-        user_id: item.user_id,
+        author_id: item.user_id,
+        author: item.authors,
         post: item.post,
         image_url: item.image_url,
         createdAt: item.createdAt,
