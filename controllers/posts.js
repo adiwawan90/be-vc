@@ -3,6 +3,7 @@ const { Posts } = require("../models");
 const { Users } = require("../models");
 const { Post_likes } = require("../models");
 const { Comments } = require("../models");
+const { Followers } = require("../models");
 
 const Validator = require("fastest-validator");
 const v = new Validator();
@@ -274,6 +275,7 @@ module.exports = {
             as: "likes",
           },
         ],
+        order: [["id", "ASC"]],
       });
 
       const mapResult = posts.map((item) => ({
@@ -294,7 +296,7 @@ module.exports = {
       }));
 
       return res.status(200).json({
-        status: "success ya",
+        status: "success",
         data: mapResult,
       });
     } catch (error) {

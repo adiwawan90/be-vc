@@ -103,11 +103,30 @@ module.exports = {
         where: { following_id: id, status: 1 },
       });
 
+      const mapidsFollowers = idsFollowers
+        .filter((item) => {
+          return item.status == 1;
+        })
+        .map((item) => item.user_id);
+
+      const mapFollowers = mapidsFollowers?.map(async (id) => {
+        const user = await Users.findByPk(id, {
+          attributes: { exclude: ["password"] },
+        });
+        return user;
+      });
+
       const userWithFollowers = {
         id: user.id,
         username: user.username,
+        email: user.email,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        photo_url: user.photo_url,
         following: await Promise.all(mapFollowing),
-        followers: idsFollowers,
+        followers: await Promise.all(mapFollowers),
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       return res.status(200).json({

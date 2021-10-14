@@ -3,7 +3,10 @@ const moment = require("moment");
 const Validator = require("fastest-validator");
 const v = new Validator();
 
+const argon2 = require("argon2");
+
 const { Users } = require("../models");
+const { Followers } = require("../models");
 
 module.exports = {
   async register(req, res) {
@@ -36,7 +39,10 @@ module.exports = {
       });
     }
 
-    const password = await bcrypt.hash(req.body.password, 10);
+    // const password = await bcrypt.hash(req.body.password, 10);
+    const password = await argon2.hash(req.body.password, {
+      type: argon2.argon2id,
+    });
 
     const data = {
       password,
@@ -77,6 +83,13 @@ module.exports = {
 
     const user = await Users.findOne({
       where: { email: req.body.email },
+      include: [
+        {
+          model: Followers,
+          as: "Followers",
+          // where: { status: 1 },
+        },
+      ],
     });
 
     if (!user) {
@@ -86,10 +99,15 @@ module.exports = {
       });
     }
 
-    const isValidPassword = await bcrypt.compare(
-      req.body.password,
-      user.password
+    // const isValidPassword = await bcrypt.compare(
+    //   req.body.password,
+    //   user.password
+    // );
+    const isValidPassword = await argon2.verify(
+      user.password,
+      req.body.password
     );
+
     if (!isValidPassword) {
       return res.status(404).json({
         status: "error",
@@ -97,20 +115,62 @@ module.exports = {
       });
     }
 
+    const id = user.id;
+
+    const userLogin = await Users.findByPk(id, {
+      attributes: { exclude: ["password"] },
+      include: [
+        {
+          model: Followers,
+          as: "Followers",
+        },
+      ],
+    });
+
+    const idsFollowing = userLogin.Followers?.filter((item) => {
+      return item.status == 1;
+    }).map((item) => item.following_id);
+
+    const mapFollowing = idsFollowing?.map(async (id) => {
+      const user = await Users.findByPk(id, {
+        attributes: { exclude: ["password"] },
+      });
+      return user;
+    });
+
+    const idsFollowers = await Followers.findAll({
+      where: { following_id: id, status: 1 },
+    });
+
+    const mapidsFollowers = idsFollowers
+      .filter((item) => {
+        return item.status == 1;
+      })
+      .map((item) => item.user_id);
+
+    const mapFollowers = mapidsFollowers?.map(async (id) => {
+      const user = await Users.findByPk(id, {
+        attributes: { exclude: ["password"] },
+      });
+      return user;
+    });
+
+    const userWithFollowers = {
+      id: userLogin.id,
+      username: userLogin.username,
+      email: userLogin.email,
+      firstname: userLogin.firstname,
+      lastname: userLogin.lastname,
+      photo_url: userLogin.photo_url,
+      following: await Promise.all(mapFollowing),
+      followers: await Promise.all(mapFollowers),
+      createdAt: userLogin.createdAt,
+      updatedAt: userLogin.updatedAt,
+    };
+
     res.json({
       status: "success",
-      data: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        photo_url: user.photo_url,
-        role: user.role,
-        status: user.status,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
+      data: userWithFollowers,
     });
   },
 
@@ -163,7 +223,17 @@ module.exports = {
       }
 
       const id = req.params.id;
-      const user = await Users.findByPk(id);
+      // const user = await Users.findByPk(id);
+
+      const user = await Users.findByPk(id, {
+        attributes: { exclude: ["password"] },
+        include: [
+          {
+            model: Followers,
+            as: "Followers",
+          },
+        ],
+      });
 
       if (!user) {
         return res.status(404).json({
@@ -171,6 +241,34 @@ module.exports = {
           message: "user not found",
         });
       }
+
+      const idsFollowing = user.Followers?.filter((item) => {
+        return item.status == 1;
+      }).map((item) => item.following_id);
+
+      const mapFollowing = idsFollowing?.map(async (id) => {
+        const user = await Users.findByPk(id, {
+          attributes: { exclude: ["password"] },
+        });
+        return user;
+      });
+
+      const idsFollowers = await Followers.findAll({
+        where: { following_id: id, status: 1 },
+      });
+
+      const mapidsFollowers = idsFollowers
+        .filter((item) => {
+          return item.status == 1;
+        })
+        .map((item) => item.user_id);
+
+      const mapFollowers = mapidsFollowers?.map(async (id) => {
+        const user = await Users.findByPk(id, {
+          attributes: { exclude: ["password"] },
+        });
+        return user;
+      });
 
       const email = req.body.email;
       if (email) {
@@ -202,13 +300,18 @@ module.exports = {
             firstname: updatedUser.firstname,
             lastname: updatedUser.lastname,
             photo_url: updatedUser.photo_url,
+            following: await Promise.all(mapFollowing),
+            followers: await Promise.all(mapFollowers),
             createdAt: updatedUser.createdAt,
             updatedAt: updatedUser.updatedAt,
           },
         });
       }
 
-      const password = await bcrypt.hash(req.body.password, 10);
+      // const password = await bcrypt.hash(req.body.password, 10);
+      const password = await argon2.hash(req.body.password, {
+        type: argon2.argon2id,
+      });
       await user.update({
         username,
         email,
@@ -227,6 +330,8 @@ module.exports = {
           firstname,
           lastname,
           photo_url,
+          following: await Promise.all(mapFollowing),
+          followers: idsFollowers,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         },
