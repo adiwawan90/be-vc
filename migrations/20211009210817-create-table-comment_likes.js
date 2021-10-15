@@ -22,8 +22,7 @@ module.exports = {
         allowNull: false,
       },
       status_like: {
-        type: Sequelize.ENUM,
-        values: ["like", "dislike"],
+        type: Sequelize.TINYINT(1),
         allowNull: false,
       },
       created_at: {
@@ -44,6 +43,8 @@ module.exports = {
         table: "users",
         field: "id",
       },
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
 
     await queryInterface.addConstraint("comment_likes", {
@@ -54,6 +55,8 @@ module.exports = {
         table: "posts",
         field: "id",
       },
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
 
     await queryInterface.addConstraint("comment_likes", {
@@ -64,6 +67,8 @@ module.exports = {
         table: "comments",
         field: "id",
       },
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
   },
 

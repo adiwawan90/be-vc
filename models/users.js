@@ -64,22 +64,34 @@ module.exports = (sequelize, DataTypes) => {
   Users.associate = (models) => {
     Users.hasMany(models.Posts, {
       foreignKey: "user_id",
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
     Users.hasMany(models.Followers, {
       foreignKey: "user_id",
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
     Users.hasMany(models.Posts, {
       foreignKey: "user_id",
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
     Users.hasMany(models.Comments, {
       foreignKey: "user_id",
+      onDelete: "cascade",
+      onUpdate: "cascade",
       as: "user",
     });
     Users.hasMany(models.Post_likes, {
       foreignKey: "user_id",
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
     Users.hasMany(models.Comment_likes, {
       foreignKey: "user_id",
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
   };
 

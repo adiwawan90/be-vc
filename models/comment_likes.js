@@ -20,11 +20,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      status_likes: {
-        type: DataTypes.ENUM,
-        values: ["like", "dislike"],
+      status_like: {
+        type: DataTypes.TINYINT(1),
         allowNull: false,
-        defaultValue: null,
       },
       createdAt: {
         field: "created_at",
@@ -45,13 +43,22 @@ module.exports = (sequelize, DataTypes) => {
 
   Comment_likes.associate = (models) => {
     Comment_likes.belongsTo(models.Users, {
-      foreignKey: "user_id",
+      as: "user",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+      foreignKey: { name: "user_id", allowNull: false },
     });
     Comment_likes.belongsTo(models.Posts, {
-      foreignKey: "post_id",
+      as: "posts",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+      foreignKey: { name: "post_id", allowNull: false },
     });
     Comment_likes.belongsTo(models.Comments, {
-      foreignKey: "comment_id",
+      as: "likes",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+      foreignKey: { name: "comment_id", allowNull: false },
     });
   };
 

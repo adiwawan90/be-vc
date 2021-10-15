@@ -3,7 +3,7 @@ const { Posts } = require("../models");
 const { Users } = require("../models");
 const { Post_likes } = require("../models");
 const { Comments } = require("../models");
-const { Followers } = require("../models");
+const { Comment_likes } = require("../models");
 
 const Validator = require("fastest-validator");
 const v = new Validator();
@@ -159,6 +159,7 @@ module.exports = {
       });
     }
   },
+  // getPost by ID
   async postWithStatus(req, res) {
     const { postId } = req.params;
 
@@ -235,6 +236,7 @@ module.exports = {
       });
     }
   },
+  // get All posts
   async allPostWithStatus(req, res) {
     try {
       const posts = await Posts.findAll({
@@ -255,7 +257,12 @@ module.exports = {
                   "photo_url",
                 ],
               },
+              {
+                model: Comment_likes,
+                as: "likes",
+              },
             ],
+            // order: [[{ model: Comments, as: "comments" }, "id", "DESC"]],
           },
           {
             model: Users,
@@ -269,13 +276,15 @@ module.exports = {
               "photo_url",
             ],
           },
-
           {
             model: Post_likes,
             as: "likes",
           },
         ],
-        order: [["id", "ASC"]],
+        order: [
+          ["id", "ASC"],
+          [{ model: Comments, as: "comments" }, "id", "ASC"],
+        ],
       });
 
       const mapResult = posts.map((item) => ({
@@ -286,7 +295,21 @@ module.exports = {
         image_url: item.image_url,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
-        comments: item.comments,
+        comments: item.comments?.map((item) => ({
+          id: item.id,
+          user_id: item.user_id,
+          post_id: item.post_id,
+          comment: item.comment,
+          user: item.user,
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          likes: item.likes
+            ?.filter((tot) => tot.status_like === 1)
+            ?.map((item) => item.status_like).length,
+          dislikes: item.likes
+            ?.filter((tot) => tot.status_like === 0)
+            ?.map((item) => item.status_like).length,
+        })),
         likes: item.likes
           ?.filter((tot) => tot.status_like === 1)
           ?.map((item) => item.status_like).length,

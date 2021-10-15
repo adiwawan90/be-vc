@@ -51,7 +51,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: { name: "post_id", allowNull: false },
     });
     Comments.hasMany(models.Comment_likes, {
-      foreignKey: "comment_id",
+      as: "likes",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+      foreignKey: { name: "comment_id", allowNull: false },
     });
   };
 

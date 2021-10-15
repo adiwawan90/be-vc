@@ -39,6 +39,8 @@ module.exports = {
         table: "users",
         field: "id",
       },
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
 
     await queryInterface.addConstraint("post_likes", {
@@ -49,6 +51,8 @@ module.exports = {
         table: "posts",
         field: "id",
       },
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
   },
 

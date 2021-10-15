@@ -57,6 +57,8 @@ module.exports = {
       type: "unique",
       fields: ["email"],
       name: "UNIQUE_USERS_EMAIL",
+      onDelete: "cascade",
+      onUpdate: "cascade",
     });
   },
 

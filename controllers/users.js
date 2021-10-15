@@ -277,6 +277,7 @@ module.exports = {
         });
 
         if (checkEmail && email !== user.email) {
+          // ada,
           return res.status(409).json({
             status: "error",
             message: "email already exist",

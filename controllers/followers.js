@@ -89,10 +89,12 @@ module.exports = {
       }
 
       const idsFollowing = user.Followers?.filter((item) => {
+        //[3,1]
         return item.status == 1;
       }).map((item) => item.following_id);
 
       const mapFollowing = idsFollowing?.map(async (id) => {
+        // [ {3}, {1} ]
         const user = await Users.findByPk(id, {
           attributes: { exclude: ["password"] },
         });
@@ -100,16 +102,17 @@ module.exports = {
       });
 
       const idsFollowers = await Followers.findAll({
-        where: { following_id: id, status: 1 },
+        where: { following_id: id, status: 1 }, // id == kita
       });
 
-      const mapidsFollowers = idsFollowers
+      const mapidsFollowers = idsFollowers //[3,1]
         .filter((item) => {
           return item.status == 1;
         })
         .map((item) => item.user_id);
 
       const mapFollowers = mapidsFollowers?.map(async (id) => {
+        // [ {3}, {1} ]
         const user = await Users.findByPk(id, {
           attributes: { exclude: ["password"] },
         });
@@ -123,7 +126,7 @@ module.exports = {
         firstname: user.firstname,
         lastname: user.lastname,
         photo_url: user.photo_url,
-        following: await Promise.all(mapFollowing),
+        following: await Promise.all(mapFollowing), //[Promise{}] array of Promise
         followers: await Promise.all(mapFollowers),
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -131,7 +134,7 @@ module.exports = {
 
       return res.status(200).json({
         status: "success",
-        data: await userWithFollowers,
+        data: userWithFollowers,
       });
     } catch (error) {
       return res.status(400).json({
